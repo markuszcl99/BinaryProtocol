@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.markus</groupId>
+    <artifactId>BinaryProtocol</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <uberjar.name>benchmarks</uberjar.name>
+        <!--序列化工具依赖版本 start-->
+        <!--各序列化工具包版本选择最近几次发布的、使用次数最多的-->
+        <!--在这里同意修改，比较方便-->
+        <protobuf.java.version>3.19.4</protobuf.java.version>
+        <protostuff.core.version>1.8.0</protostuff.core.version>
+        <protostuff.runtime.version>1.8.0</protostuff.runtime.version>
+        <fastjson.version>1.2.78</fastjson.version>
+        <jackson.version>2.12.3</jackson.version>
+        <kryo.version>5.3.0</kryo.version>
+        <fst.version>2.57</fst.version>
+        <xstream.version>1.4.19</xstream.version>
+        <!--序列化工具依赖版本 end-->
+    </properties>
+    <dependencies>
+        <!--性能测试工具-->
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>1.21</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>1.21</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--protobuf-->
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf.java.version}</version>
+        </dependency>
+        <!--fastjson-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>${fastjson.version}</version>
+        </dependency>
+        <!-- jackson -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <!-- kryo -->
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <version>${kryo.version}</version>
+        </dependency>
+        <!-- fst -->
+        <dependency>
+            <groupId>de.ruedigermoeller</groupId>
+            <artifactId>fst</artifactId>
+            <version>${fst.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.objenesis</groupId>
+                    <artifactId>objenesis</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--xstream-->
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>${xstream.version}</version>
+        </dependency>
+        <!-- protostuff-core -->
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-core</artifactId>
+            <version>${protostuff.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-runtime</artifactId>
+            <version>${protostuff.runtime.version}</version>
+        </dependency>
+        <!--guava工具-->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>31.0.1-jre</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.12</version>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.5.0.Final</version>
+            </extension>
+        </extensions>
+        <plugins>
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>0.6.1</version>
+                <configuration>
+                    <pluginId>protoc-java</pluginId>
+                    <!-- proto文件放置的目录 -->
+                    <protoSourceRoot>${project.basedir}/src/main/resources/proto</protoSourceRoot>
+                    <!-- 生成文件的目录 -->
+                    <outputDirectory>${project.basedir}/src/main/java</outputDirectory>
+                    <!-- 生成文件前是否把目标目录清空，这个最好设置为false，以免误删项目文件 -->
+                    <clearOutputDirectory>false</clearOutputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>${uberjar.name}</finalName>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.openjdk.jmh.Main</mainClass>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <!--
+                                        Shading signed JARs will fail without this.
+                                        http://stackoverflow.com/questions/999489/invalid-signature-file-when-attempting-to-run-a-jar
+                                    -->
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
